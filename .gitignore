@@ -1,0 +1,14 @@
+# Node modules
+node_modules/
+dist/
+# Compiled JavaScript
+*.js
+
+# Source maps
+*.js.map
+
+# Logs
+*.log
+
+# Environment files
+.env
