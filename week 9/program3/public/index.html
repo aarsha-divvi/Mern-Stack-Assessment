@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management System</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f2f2;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        input {
+            padding: 10px;
+            flex: 1;
+        }
+
+        button {
+            padding: 10px 15px;
+            cursor: pointer;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 12px;
+            text-align: center;
+        }
+
+        th {
+            background: #eee;
+        }
+
+        #message {
+            margin: 15px 0;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Student Management System</h1>
+
+    <form id="studentForm">
+
+        <input
+            type="text"
+            id="name"
+            placeholder="Student Name"
+            value="Aditya"
+            required
+        >
+
+        <input
+            type="number"
+            id="age"
+            placeholder="Age"
+            value="15"
+            required
+        >
+
+        <input
+            type="text"
+            id="course"
+            placeholder="Course"
+            value="MERN Stack"
+            required
+        >
+
+        <button type="submit">
+            Add Student
+        </button>
+
+    </form>
+
+    <div id="message"></div>
+
+    <table>
+
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Age</th>
+                <th>Course</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+
+        <tbody id="studentList"></tbody>
+
+    </table>
+
+</div>
+
+<script>
+
+    const form = document.getElementById("studentForm");
+    const studentList = document.getElementById("studentList");
+    const message = document.getElementById("message");
+
+    // GET students
+    async function loadStudents() {
+
+        try {
+
+            const response = await fetch("/api/students");
+
+            if (!response.ok) {
+                throw new Error("Could not load students");
+            }
+
+            const students = await response.json();
+
+            studentList.innerHTML = "";
+
+            students.forEach(student => {
+
+                const row = document.createElement("tr");
+
+                row.innerHTML = `
+                    <td>${student.name}</td>
+                    <td>${student.age}</td>
+                    <td>${student.course}</td>
+                    <td>
+                        <button onclick="deleteStudent('${student._id}')">
+                            Delete
+                        </button>
+                    </td>
+                `;
+
+                studentList.appendChild(row);
+
+            });
+
+        } catch (error) {
+
+            message.innerText = "Error loading students: " + error.message;
+
+        }
+    }
+
+    // POST student
+    form.addEventListener("submit", async function(event) {
+
+        event.preventDefault();
+
+        const name = document.getElementById("name").value;
+        const age = document.getElementById("age").value;
+        const course = document.getElementById("course").value;
+
+        try {
+
+            const response = await fetch("/api/students", {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+                    name: name,
+                    age: Number(age),
+                    course: course
+                })
+
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || "Failed to add student");
+            }
+
+            message.innerText = "Student added successfully!";
+
+            form.reset();
+
+            loadStudents();
+
+        } catch (error) {
+
+            message.innerText =
+                "Error adding student: " + error.message;
+
+            console.error(error);
+
+        }
+
+    });
+
+    // DELETE student
+    async function deleteStudent(id) {
+
+        try {
+
+            const response = await fetch(
+                `/api/students/${id}`,
+                {
+                    method: "DELETE"
+                }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message);
+            }
+
+            message.innerText = "Student deleted successfully!";
+
+            loadStudents();
+
+        } catch (error) {
+
+            message.innerText =
+                "Error deleting student: " + error.message;
+
+        }
+
+    }
+
+    // Load students when page opens
+    loadStudents();
+
+</script>
+
+</body>
+</html>

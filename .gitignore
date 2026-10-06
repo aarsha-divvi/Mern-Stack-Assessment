@@ -2,7 +2,6 @@
 node_modules/
 dist/
 # Compiled JavaScript
-*.js
 
 # Source maps
 *.js.map
